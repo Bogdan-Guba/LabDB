@@ -8,7 +8,7 @@ import com.example.labsbase.DB.Entity.CarsGlobal
 @Dao
 interface DAOCarsGlobal {
     @Insert
-    fun insertUser(сarsGlobal: CarsGlobal)
+    fun insert(сarsGlobal: CarsGlobal)
 
     @Query("SELECT * FROM CarsGlobal")
     fun getAllUsers(): List<CarsGlobal>

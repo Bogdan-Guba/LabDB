@@ -18,7 +18,10 @@ import com.example.labsbase.DB.Database.LocalDB1
 import com.example.labsbase.DB.Database.LocalDB2
 import com.example.labsbase.DB.Entity.CarsGlobal
 import com.example.labsbase.ui.theme.LabsBaseTheme
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
@@ -30,6 +33,16 @@ class MainActivity : ComponentActivity() {
         val DaoCarsLocal1 = LocalDB1.CarsLocal1Dao()
         val LocalDB2 = Room.databaseBuilder(this, LocalDB2::class.java, "LocalDB2").build()
         val DaoCarsLocal2 = LocalDB2.CarsLocal2Dao()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // Ваш код, выполняемый в фоновом потоке с использованием корутин
+            val result = withContext(Dispatchers.IO) {
+                // Ваша долгая операция, например, загрузка данных из сети или базы данных
+                //DaoCentralDB.insert(CarsGlobal("123", "aaa", "eeee", 1, 150))
+            }
+        }
+
+
 
         setContent {
             LabsBaseTheme {
