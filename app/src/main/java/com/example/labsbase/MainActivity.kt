@@ -3,26 +3,25 @@ package com.example.labsbase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.room.Room
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import com.example.labsbase.DB.Controller
-import com.example.labsbase.DB.DAO.DAOCarsLocal1
-import com.example.labsbase.DB.Database.CentralDB
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.runtime.*
 
-import com.example.labsbase.DB.Database.LocalDB1
-import com.example.labsbase.DB.Database.LocalDB2
-import com.example.labsbase.DB.Entity.CarsGlobal
-import com.example.labsbase.ui.theme.LabsBaseTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
@@ -31,38 +30,69 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Controller.initialize(this)
-
-
-
-
-
-
         setContent {
-            LabsBaseTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
+            MainScreen()
+        }
+
+
+
+
+
+
+
+    }
+    @Composable
+    fun MainScreen() {
+        var vin by remember { mutableStateOf(TextFieldValue()) }
+        var databaseText by remember { mutableStateOf("") }
+
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Текстовое поле для ввода VIN
+            TextField(
+                value = vin,
+                onValueChange = { vin = it },
+                label = { Text("VIN") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Кнопки
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(onClick = { /* Заполнить */ }) {
+                    Text("Заполнить")
+                }
+                Button(onClick = { /* Удалить */ }) {
+                    Text("Удалить")
+                }
+                Button(onClick = { /* Обновить */ }) {
+                    Text("Обновить")
+                }
+                Button(onClick = { /* Изменить */ }) {
+                    Text("Изменить")
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Большое текстовое поле для вывода информации из базы
+            BasicTextField(
+                value = databaseText,
+                onValueChange = { databaseText = it },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    LabsBaseTheme {
-        Greeting("Android")
+    @Composable
+    fun MainScreenPreview() {
+        MainScreen()
     }
 }
+
+

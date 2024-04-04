@@ -1,9 +1,6 @@
 package com.example.labsbase.DB
 
 import android.content.Context
-import android.util.Log
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Room
 
 import com.example.labsbase.DB.DAO.DAOCarsGlobal
@@ -156,6 +153,30 @@ object Controller {
                 }
             }
         }
+    }
+    fun getAllOfLocal():List<CarsLocal>{
+        var total= mutableListOf<CarsLocal>()
+        var list1=mutableListOf<CarsLocal>()
+        var list2=mutableListOf<CarsLocal>()
+        CoroutineScope(Dispatchers.Main).launch {
+
+            val result = withContext(Dispatchers.IO) {
+                try{
+                   list1=daoCarsLocal1.getAll().toMutableList()
+                }catch (e:Exception){
+                    print("Error in get first")
+                }
+                try{
+                    list2=daoCarsLocal2.getAll().toMutableList()
+                }catch (e:Exception){
+                    print("Error in get 2")
+                }
+            }
+
+        }
+        total.addAll(list1)
+        total.addAll(list2)
+        return total
     }
 
 }
