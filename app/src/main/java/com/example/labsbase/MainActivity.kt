@@ -7,17 +7,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 
 class MainActivity : ComponentActivity() {
 
@@ -68,6 +73,7 @@ fun generateDummyCars(): List<Car> {
 fun MainScreen() {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
     var databaseText by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
 
     val cars = remember { generateDummyCars() }
 
@@ -75,27 +81,61 @@ fun MainScreen() {
         modifier = Modifier.padding(16.dp)
     ) {
         // Текстовое поле для ввода поискового запроса
-        TextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            label = { Text("Поиск...") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Кнопка "Искать"
-        Button(
-            onClick = {
-                val result = filterCars(cars, searchQuery.text)
-                databaseText = result.joinToString("\n\n")
-            },
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Искать")
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Пошук...") },
+                modifier = Modifier.weight(1f),
+                trailingIcon = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                val result = filterCars(cars, searchQuery.text)
+                                if (result.isNotEmpty()) {
+                                    databaseText = result.joinToString("\n\n")
+                                    errorMessage = ""
+                                } else {
+                                    errorMessage = "Результатів не знайдено"
+                                    databaseText = ""
+                                }
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = "Search",
+                                tint = Color.Black
+                            )
+                        }
+                        IconButton(
+                            onClick = {  },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AddCircle,
+                                contentDescription = "Add",
+                                tint = Color.Black
+                            )
+                        }
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
 
         // Большое текстовое поле для вывода информации из базы
         Column(
