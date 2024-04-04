@@ -6,6 +6,6 @@ import com.example.labsbase.DB.DAO.DAOCarsGlobal
 import com.example.labsbase.DB.Entity.CarsGlobal
 
 @Database(entities = [CarsGlobal::class], version = 1)
-abstract class CenrtalDB : RoomDatabase() {
+abstract class CentralDB : RoomDatabase() {
     abstract fun carsGlobalDao(): DAOCarsGlobal
 }
