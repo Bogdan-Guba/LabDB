@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class CarsLocal2(
+data class CarsLocal(
     @PrimaryKey val VIN: String,
     val Mark: String,
     val Model: String,

@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Room
-import com.example.labsbase.DB.Controller.daoCarsLocal1
+
 import com.example.labsbase.DB.DAO.DAOCarsGlobal
 import com.example.labsbase.DB.DAO.DAOCarsLocal1
 import com.example.labsbase.DB.DAO.DAOCarsLocal2
@@ -14,8 +14,8 @@ import com.example.labsbase.DB.Database.CentralDB
 import com.example.labsbase.DB.Database.LocalDB1
 import com.example.labsbase.DB.Database.LocalDB2
 import com.example.labsbase.DB.Entity.CarsGlobal
-import com.example.labsbase.DB.Entity.CarsLocal1
-import com.example.labsbase.DB.Entity.CarsLocal2
+import com.example.labsbase.DB.Entity.CarsLocal
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ object Controller {
 
     }
 
-    fun incertLocalDB1(carsLocal1:CarsLocal1){
+    fun incertLocalDB1(carsLocal1:CarsLocal){
         CoroutineScope(Dispatchers.Main).launch {
 
             val result = withContext(Dispatchers.IO) {
@@ -87,7 +87,7 @@ object Controller {
     }
 }
 
-    fun incertLocalDB2(carsLocal2: CarsLocal2){
+    fun incertLocalDB2(carsLocal2: CarsLocal){
         CoroutineScope(Dispatchers.Main).launch {
 
             val result = withContext(Dispatchers.IO) {
@@ -109,30 +109,30 @@ object Controller {
 
 
     fun insertTableLocalDB1() {
-        incertLocalDB1(CarsLocal1("ABC12345678901234", "Toyota", "Camry", 25000, "blue", 2.5f, "Basic"))
-        incertLocalDB1(CarsLocal1("DEF23456789012345", "Honda", "Accord", 28000, "red", 2.0f, "Premium"))
-        incertLocalDB1(CarsLocal1("GHI34567890123456", "Ford", "Mustang", 35000, "yellow", 3.0f, "Premium"))
-        incertLocalDB1(CarsLocal1("JKL45678901234567", "Chevrolet", "Cruze", 23000, "white", 1.8f, "Standard"))
-        incertLocalDB1(CarsLocal1("MNO56789012345678", "BMW", "X5", 60000, "black", 4.0f, "Luxury"))
-        incertLocalDB1(CarsLocal1("PQR67890123456789", "Mercedes-Benz", "E-Class", 55000, "silver", 3.5f, "Premium"))
-        incertLocalDB1(CarsLocal1("STU78901234567890", "Audi", "A4", 42000, "grey", 2.0f, "Premium"))
-        incertLocalDB1(CarsLocal1("VWX89012345678901", "Volkswagen", "Golf", 28000, "green", 1.6f, "Standard"))
-        incertLocalDB1(CarsLocal1("YZA90123456789012", "Subaru", "Forester", 32000, "orange", 2.5f, "Premium"))
-        incertLocalDB1(CarsLocal1("BCD01234567890123", "Lexus", "RX", 55000, "beige", 3.5f, "Luxury"))
+        incertLocalDB1(CarsLocal("ABC12345678901234", "Toyota", "Camry", 25000, "blue", 2.5f, "Basic"))
+        incertLocalDB1(CarsLocal("DEF23456789012345", "Honda", "Accord", 28000, "red", 2.0f, "Premium"))
+        incertLocalDB1(CarsLocal("GHI34567890123456", "Ford", "Mustang", 35000, "yellow", 3.0f, "Premium"))
+        incertLocalDB1(CarsLocal("JKL45678901234567", "Chevrolet", "Cruze", 23000, "white", 1.8f, "Standard"))
+        incertLocalDB1(CarsLocal("MNO56789012345678", "BMW", "X5", 60000, "black", 4.0f, "Luxury"))
+        incertLocalDB1(CarsLocal("PQR67890123456789", "Mercedes-Benz", "E-Class", 55000, "silver", 3.5f, "Premium"))
+        incertLocalDB1(CarsLocal("STU78901234567890", "Audi", "A4", 42000, "grey", 2.0f, "Premium"))
+        incertLocalDB1(CarsLocal("VWX89012345678901", "Volkswagen", "Golf", 28000, "green", 1.6f, "Standard"))
+        incertLocalDB1(CarsLocal("YZA90123456789012", "Subaru", "Forester", 32000, "orange", 2.5f, "Premium"))
+        incertLocalDB1(CarsLocal("BCD01234567890123", "Lexus", "RX", 55000, "beige", 3.5f, "Luxury"))
     }
 
 
     fun insertTableLocalDB2(){
-        incertLocalDB2(CarsLocal2("ZAB23456789012345", "Renault", "Master", 35325, "blue", 2.3f, "Base"))
-        incertLocalDB2(CarsLocal2("BCD45678901234567", "Peugeot", "3008", 32870, "black", 1.5f, "Allure Pack"))
-        incertLocalDB2(CarsLocal2("DEF67890123456789", "Volkswagen", "T-Roc", 31154, "green", 1.4f, "Style"))
-        incertLocalDB2(CarsLocal2("GHI90123456789012", "Mercedes-Benz", "V-Class", 125746, "silver", 2.1f, "AMG Style"))
-        incertLocalDB2(CarsLocal2("IJK12345678901234", "Kia", "Stonic", 24160, "white", 1.4f, "Prestige"))
-        incertLocalDB2(CarsLocal2("NOP67890123456789", "Volkswagen", "Tiguan", 40781, "gray", 2.0f, "Life"))
-        incertLocalDB2(CarsLocal2("ZAB89012345678901", "Citroen", "C3", 17041, "platinum", 1.2f, "Feel"))
-        incertLocalDB2(CarsLocal2("BCD01234567890123", "Volkswagen", "Arteon", 52307, "black", 2.0f, "R-Line"))
-        incertLocalDB2(CarsLocal2("QRS23456789012345", "Skoda", "Octavia", 33579, "red", 1.6f, "Style"));
-        incertLocalDB2(CarsLocal2("TUV45678901234567", "Toyota", "Camry", 38420, "beige", 2.5f, "LE"));
+        incertLocalDB2(CarsLocal("ZAB23456789012345", "Renault", "Master", 35325, "blue", 2.3f, "Base"))
+        incertLocalDB2(CarsLocal("BCD45678901234567", "Peugeot", "3008", 32870, "black", 1.5f, "Allure Pack"))
+        incertLocalDB2(CarsLocal("DEF67890123456789", "Volkswagen", "T-Roc", 31154, "green", 1.4f, "Style"))
+        incertLocalDB2(CarsLocal("GHI90123456789012", "Mercedes-Benz", "V-Class", 125746, "silver", 2.1f, "AMG Style"))
+        incertLocalDB2(CarsLocal("IJK12345678901234", "Kia", "Stonic", 24160, "white", 1.4f, "Prestige"))
+        incertLocalDB2(CarsLocal("NOP67890123456789", "Volkswagen", "Tiguan", 40781, "gray", 2.0f, "Life"))
+        incertLocalDB2(CarsLocal("ZAB89012345678901", "Citroen", "C3", 17041, "platinum", 1.2f, "Feel"))
+        incertLocalDB2(CarsLocal("BCD01234567890123", "Volkswagen", "Arteon", 52307, "black", 2.0f, "R-Line"))
+        incertLocalDB2(CarsLocal("QRS23456789012345", "Skoda", "Octavia", 33579, "red", 1.6f, "Style"));
+        incertLocalDB2(CarsLocal("TUV45678901234567", "Toyota", "Camry", 38420, "beige", 2.5f, "LE"));
     }
 
     suspend fun DeleteInAllDB(VIN:String) {

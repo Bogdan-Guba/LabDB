@@ -4,20 +4,20 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.labsbase.DB.Entity.CarsLocal1
+import com.example.labsbase.DB.Entity.CarsLocal
 
 
 @Dao
 interface DAOCarsLocal1 {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(сarsLocal1: CarsLocal1)
-    @Query("SELECT * FROM CarsLocal1")
-    fun getAll(): List<CarsLocal1>
+    fun insert(сarsLocal: CarsLocal)
+    @Query("SELECT * FROM CarsLocal")
+    fun getAll(): List<CarsLocal>
 
-    @Query("DELETE FROM CarsLocal1 WHERE VIN = :VIN")
+    @Query("DELETE FROM CarsLocal WHERE VIN = :VIN")
     suspend fun deleteByVIN(VIN: String)
 
-    @Query("DELETE FROM CarsLocal1")
+    @Query("DELETE FROM CarsLocal")
     fun deleteAll()
 }
