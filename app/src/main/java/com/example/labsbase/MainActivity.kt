@@ -1,3 +1,5 @@
+package com.example.labsbase
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,8 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 
 class MainActivity : ComponentActivity() {
@@ -101,18 +105,28 @@ fun MainScreen() {
         ) {
             databaseText.split("\n\n").forEach { carInfo ->
                 Surface(
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
                 ) {
-                    Text(
-                        text = carInfo,
+                    Column(
                         modifier = Modifier.padding(16.dp)
-                    )
+                    ) {
+                        carInfo.split(",").forEach { carDetail ->
+                            Text(
+                                text = carDetail.trim(),
+                                fontSize = 16.sp,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
-
 
 // Функция фильтрации автомобилей
 fun filterCars(cars: List<Car>, query: String): List<String> {
