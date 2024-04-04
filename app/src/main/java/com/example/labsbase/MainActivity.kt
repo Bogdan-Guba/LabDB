@@ -35,13 +35,7 @@ data class Car(
 
 @Composable
 fun MainScreen() {
-    var vin by remember { mutableStateOf(TextFieldValue()) }
-    var mark by remember { mutableStateOf(TextFieldValue()) }
-    var model by remember { mutableStateOf(TextFieldValue()) }
-    var price by remember { mutableStateOf(TextFieldValue()) }
-    var color by remember { mutableStateOf(TextFieldValue()) }
-    var engineVolume by remember { mutableStateOf(TextFieldValue()) }
-    var complection by remember { mutableStateOf(TextFieldValue()) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue()) }
     var databaseText by remember { mutableStateOf("") }
 
     val cars = remember { generateDummyCars() }
@@ -49,37 +43,24 @@ fun MainScreen() {
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
-        // Текстовые поля для ввода параметров поиска
+        // Текстовое поле для ввода поискового запроса
         TextField(
-            value = vin,
-            onValueChange = { vin = it },
-            label = { Text("VIN") },
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("Поиск...") },
             modifier = Modifier.fillMaxWidth()
         )
-
-        TextField(
-            value = mark,
-            onValueChange = { mark = it },
-            label = { Text("MARK") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = model,
-            onValueChange = { model = it },
-            label = { Text("MODEL") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Кнопка "Искать"
-        Button(onClick = {
-            // Вызов функции поиска с передачей параметров и обновление текста базы данных
-            val result = filterCars(cars, vin.text, mark.text, model.text, price.text, color.text, engineVolume.text, complection.text)
-            databaseText = result.joinToString("\n")
-        }) {
+        // Кнопка "Искать" в центре
+        Button(
+            onClick = {
+                val result = filterCars(cars, searchQuery.text)
+                databaseText = result.joinToString("\n")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Искать")
         }
 
@@ -111,24 +92,15 @@ fun generateDummyCars(): List<Car> {
 }
 
 // Функция фильтрации автомобилей
-fun filterCars(
-    cars: List<Car>,
-    vin: String,
-    mark: String,
-    model: String,
-    price: String,
-    color: String,
-    engineVolume: String,
-    complection: String
-): List<String> {
+fun filterCars(cars: List<Car>, query: String): List<String> {
     return cars.filter { car ->
-        car.vin.contains(vin) &&
-                car.mark.contains(mark) &&
-                car.model.contains(model) &&
-                car.price.toString().contains(price) &&
-                car.color.contains(color) &&
-                car.engineVolume.toString().contains(engineVolume) &&
-                car.complection.contains(complection)
+        car.vin.contains(query, ignoreCase = true) ||
+                car.mark.contains(query, ignoreCase = true) ||
+                car.model.contains(query, ignoreCase = true) ||
+                car.price.toString().contains(query, ignoreCase = true) ||
+                car.color.contains(query, ignoreCase = true) ||
+                car.engineVolume.toString().contains(query, ignoreCase = true) ||
+                car.complection.contains(query, ignoreCase = true)
     }.map { car ->
         "VIN: ${car.vin}, MARK: ${car.mark}, MODEL: ${car.model}, PRICE: ${car.price}, COLOR: ${car.color}, ENGINE VOLUME: ${car.engineVolume}, COMPLECTION: ${car.complection}"
     }
