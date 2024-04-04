@@ -3,7 +3,12 @@ package com.example.labsbase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -15,14 +20,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
 
@@ -72,7 +79,6 @@ fun generateDummyCars(): List<Car> {
 @Composable
 fun MainScreen() {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
-    var databaseText by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
     val cars = remember { generateDummyCars() }
@@ -87,23 +93,29 @@ fun MainScreen() {
         ) {
             TextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = {
+                    searchQuery = it
+                    val result = filterCars(cars, it.text)
+                    errorMessage = if (result.isNotEmpty()) {
+                        ""
+                    } else {
+                        "Результатів не знайдено"
+                    }
+                },
                 label = { Text("Пошук...") },
                 modifier = Modifier.weight(1f),
                 trailingIcon = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(end = 4.dp)
                     ) {
                         IconButton(
                             onClick = {
                                 val result = filterCars(cars, searchQuery.text)
-                                if (result.isNotEmpty()) {
-                                    databaseText = result.joinToString("\n\n")
-                                    errorMessage = ""
+                                errorMessage = if (result.isNotEmpty()) {
+                                    ""
                                 } else {
-                                    errorMessage = "Результатів не знайдено"
-                                    databaseText = ""
+                                    "Результатів не знайдено"
                                 }
                             },
                         ) {
@@ -114,7 +126,7 @@ fun MainScreen() {
                             )
                         }
                         IconButton(
-                            onClick = {  },
+                            onClick = { /**/ },
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.AddCircle,
@@ -127,39 +139,40 @@ fun MainScreen() {
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                text = errorMessage,
-                color = Color.Red,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-
-        // Большое текстовое поле для вывода информации из базы
-        Column(
+        // Таблица для вывода информации о машинах
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color.LightGray,
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
         ) {
-            databaseText.split("\n\n").forEach { carInfo ->
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        carInfo.split(",").forEach { carDetail ->
-                            Text(
-                                text = carDetail.trim(),
-                                fontSize = 16.sp,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+            Column(modifier = Modifier.padding(16.dp)) {
+                val filteredCars = filterCars(cars, searchQuery.text)
+                if (filteredCars.isEmpty()) {
+                    Text(errorMessage, color = Color.Red)
+                } else {
+                    filteredCars.forEach { car ->
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color.White,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text("VIN: ${car.vin}", modifier = Modifier.padding(bottom = 4.dp))
+                                Text("MARK: ${car.mark}", modifier = Modifier.padding(bottom = 4.dp))
+                                Text("MODEL: ${car.model}", modifier = Modifier.padding(bottom = 4.dp))
+                                Text("PRICE: ${car.price}", modifier = Modifier.padding(bottom = 4.dp))
+                                Text("COLOR: ${car.color}", modifier = Modifier.padding(bottom = 4.dp))
+                                Text("ENGINE VOLUME: ${car.engineVolume}", modifier = Modifier.padding(bottom = 4.dp))
+                                Text("COMPLECTION: ${car.complection}")
+                            }
                         }
                     }
                 }
@@ -169,7 +182,7 @@ fun MainScreen() {
 }
 
 // Функция фильтрации автомобилей
-fun filterCars(cars: List<Car>, query: String): List<String> {
+fun filterCars(cars: List<Car>, query: String): List<Car> {
     return cars.filter { car ->
         car.vin.contains(query, ignoreCase = true) ||
                 car.mark.contains(query, ignoreCase = true) ||
@@ -178,7 +191,5 @@ fun filterCars(cars: List<Car>, query: String): List<String> {
                 car.color.contains(query, ignoreCase = true) ||
                 car.engineVolume.toString().contains(query, ignoreCase = true) ||
                 car.complection.contains(query, ignoreCase = true)
-    }.map { car ->
-        "VIN: ${car.vin}, MARK: ${car.mark}, MODEL: ${car.model}, PRICE: ${car.price}, COLOR: ${car.color}, ENGINE VOLUME: ${car.engineVolume}, COMPLECTION: ${car.complection}"
     }
 }
