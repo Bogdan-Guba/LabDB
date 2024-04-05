@@ -3,9 +3,12 @@ package com.example.labsbase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -83,72 +86,71 @@ fun MainScreen() {
 
     val cars = remember { generateDummyCars() }
 
-    Column(
-        modifier = Modifier.padding(16.dp)
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Текстовое поле для ввода поискового запроса
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    val result = filterCars(cars, it.text)
-                    errorMessage = if (result.isNotEmpty()) {
-                        ""
-                    } else {
-                        "Результатів не знайдено"
-                    }
-                },
-                label = { Text("Пошук...") },
-                modifier = Modifier.weight(1f),
-                trailingIcon = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 4.dp)
-                    ) {
-                        IconButton(
-                            onClick = {
-                                val result = filterCars(cars, searchQuery.text)
-                                errorMessage = if (result.isNotEmpty()) {
-                                    ""
-                                } else {
-                                    "Результатів не знайдено"
-                                }
-                            },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Search,
-                                contentDescription = "Search",
-                                tint = Color.Black
-                            )
-                        }
-                        IconButton(
-                            onClick = { /**/ },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.AddCircle,
-                                contentDescription = "Add",
-                                tint = Color.Black
-                            )
-                        }
-                    }
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Таблица для вывода информации о машинах
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = Color.LightGray,
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .padding(16.dp)
                 .verticalScroll(rememberScrollState())
+                .background(Color.LightGray)
         ) {
+            // Текстовое поле для ввода поискового запроса
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                        val result = filterCars(cars, it.text)
+                        errorMessage = if (result.isNotEmpty()) {
+                            ""
+                        } else {
+                            "Результатів не знайдено"
+                        }
+                    },
+                    label = { Text("Пошук...") },
+                    modifier = Modifier.weight(1f),
+                    trailingIcon = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(end = 4.dp)
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    val result = filterCars(cars, searchQuery.text)
+                                    errorMessage = if (result.isNotEmpty()) {
+                                        ""
+                                    } else {
+                                        "Результатів не знайдено"
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Search,
+                                    contentDescription = "Search",
+                                    tint = Color.Black
+                                )
+                            }
+                            IconButton(
+                                onClick = { /**/ },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.AddCircle,
+                                    contentDescription = "Add",
+                                    tint = Color.Black
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Таблица для вывода информации о машинах
             Column(modifier = Modifier.padding(16.dp)) {
                 val filteredCars = filterCars(cars, searchQuery.text)
                 if (filteredCars.isEmpty()) {
@@ -180,6 +182,7 @@ fun MainScreen() {
         }
     }
 }
+
 
 // Функция фильтрации автомобилей
 fun filterCars(cars: List<Car>, query: String): List<Car> {
