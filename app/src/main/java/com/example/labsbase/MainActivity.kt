@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -96,90 +98,128 @@ fun MainScreen() {
                 .background(Color.LightGray)
         ) {
             // Текстовое поле для ввода поискового запроса
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = {
-                        searchQuery = it
-                        val result = filterCars(cars, it.text)
-                        errorMessage = if (result.isNotEmpty()) {
-                            ""
-                        } else {
-                            "Результатів не знайдено"
-                        }
-                    },
-                    label = { Text("Пошук...") },
-                    modifier = Modifier.weight(1f),
-                    trailingIcon = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(end = 4.dp)
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    val result = filterCars(cars, searchQuery.text)
-                                    errorMessage = if (result.isNotEmpty()) {
-                                        ""
-                                    } else {
-                                        "Результатів не знайдено"
-                                    }
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Search,
-                                    contentDescription = "Search",
-                                    tint = Color.Black
-                                )
-                            }
-                            IconButton(
-                                onClick = { /**/ },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.AddCircle,
-                                    contentDescription = "Add",
-                                    tint = Color.Black
-                                )
-                            }
-                        }
+            SearchBar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { newQuery ->
+                    searchQuery = newQuery
+                    val result = filterCars(cars, newQuery.text)
+                    errorMessage = if (result.isNotEmpty()) {
+                        ""
+                    } else {
+                        "Результатів не знайдено"
                     }
-                )
-            }
+                },
+                onSearch = {
+                    val result = filterCars(cars, searchQuery.text)
+                    errorMessage = if (result.isNotEmpty()) {
+                        ""
+                    } else {
+                        "Результатів не знайдено"
+                    }
+                }
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Таблица для вывода информации о машинах
-            Column(modifier = Modifier.padding(16.dp)) {
-                val filteredCars = filterCars(cars, searchQuery.text)
-                if (filteredCars.isEmpty()) {
-                    Text(errorMessage, color = Color.Red)
-                } else {
-                    filteredCars.forEach { car ->
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = Color.White,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            ) {
-                                Text("VIN: ${car.vin}", modifier = Modifier.padding(bottom = 4.dp))
-                                Text("MARK: ${car.mark}", modifier = Modifier.padding(bottom = 4.dp))
-                                Text("MODEL: ${car.model}", modifier = Modifier.padding(bottom = 4.dp))
-                                Text("PRICE: ${car.price}", modifier = Modifier.padding(bottom = 4.dp))
-                                Text("COLOR: ${car.color}", modifier = Modifier.padding(bottom = 4.dp))
-                                Text("ENGINE VOLUME: ${car.engineVolume}", modifier = Modifier.padding(bottom = 4.dp))
-                                Text("COMPLECTION: ${car.complection}")
-                            }
-                        }
+            CarList(cars = cars, searchQuery = searchQuery, errorMessage = errorMessage)
+        }
+    }
+}
+
+@Composable
+fun SearchBar(
+    searchQuery: TextFieldValue,
+    onSearchQueryChange: (TextFieldValue) -> Unit,
+    onSearch: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TextField(
+            value = searchQuery,
+            onValueChange = { newQuery -> onSearchQueryChange(newQuery) },
+            label = { Text("Пошук...") },
+            modifier = Modifier.weight(1f),
+            trailingIcon = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 4.dp)
+                ) {
+                    IconButton(onClick = { onSearch() }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search",
+                            tint = Color.Black
+                        )
+                    }
+                    IconButton(onClick = { /* Действие при нажатии на кнопку создать */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.AddCircle,
+                            contentDescription = "Add",
+                            tint = Color.Black
+                        )
                     }
                 }
             }
+        )
+    }
+}
+
+@Composable
+fun CarList(cars: List<Car>, searchQuery: TextFieldValue, errorMessage: String) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        val filteredCars = filterCars(cars, searchQuery.text)
+        if (filteredCars.isEmpty()) {
+            Text(errorMessage, color = Color.Red)
+        } else {
+            filteredCars.forEach { car ->
+                CarItem(car = car)
+            }
         }
+    }
+}
+
+@Composable
+fun CarItem(car: Car) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "VIN: ${car.vin} " +
+                            "\n\nMARK: ${car.mark}" +
+                            "\n\nMODEL: ${car.model}" +
+                            "\n\nPRICE: ${car.price}" +
+                            "\n\nCOLOR: ${car.color}" +
+                            "\n\nENGINE VOLUME: ${car.engineVolume}" +
+                            "\n\nCOMPLECTION: ${car.complection}",
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                EditButton()
+            }
+        }
+    }
+}
+
+@Composable
+fun EditButton() {
+    IconButton(
+        onClick = { /* Действие при нажатии на кнопку редактирования */ }
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Edit,
+            contentDescription = "Edit",
+            tint = Color.Black
+        )
     }
 }
 
