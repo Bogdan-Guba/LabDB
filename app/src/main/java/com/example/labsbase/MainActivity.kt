@@ -18,8 +18,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -32,12 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -53,7 +57,7 @@ data class Car(
     val price: Int,
     val color: String,
     val engineVolume: Float,
-    val complection: String
+    val completion: String,
 )
 
 fun generateDummyCars(): List<Car> {
@@ -81,12 +85,26 @@ fun generateDummyCars(): List<Car> {
     )
 }
 
+
 @Composable
 fun MainScreen() {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
     var errorMessage by remember { mutableStateOf("") }
+    var selectedMark by remember { mutableStateOf("") }
+    var selectedModel by remember { mutableStateOf("") }
+    var selectedColor by remember { mutableStateOf("") }
+    var selectedEngineVolume by remember { mutableStateOf("") }
+    var selectedCompletion by remember { mutableStateOf("") }
+    var shouldResetFilters by remember { mutableStateOf(false) } // 1. Добавлено состояние для сброса фильтров
 
     val cars = remember { generateDummyCars() }
+    var filteredCars by remember { mutableStateOf(cars) }
+
+    val marks = cars.map { it.mark }.distinct()
+    val models = cars.map { it.model }.distinct()
+    val colors = cars.map { it.color }.distinct()
+    val engineVolumes = cars.map { it.engineVolume.toString() }.distinct()
+    val completions = cars.map { it.completion }.distinct()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -102,30 +120,118 @@ fun MainScreen() {
                 searchQuery = searchQuery,
                 onSearchQueryChange = { newQuery ->
                     searchQuery = newQuery
-                    val result = filterCars(cars, newQuery.text)
-                    errorMessage = if (result.isNotEmpty()) {
+                    filteredCars = filterCars(cars, newQuery.text, selectedMark, selectedModel, selectedColor, selectedEngineVolume, selectedCompletion)
+                    errorMessage = if (filteredCars.isNotEmpty()) {
                         ""
                     } else {
-                        "Результатів не знайдено"
+                        "Нічого не знайдено"
                     }
                 },
                 onSearch = {
-                    val result = filterCars(cars, searchQuery.text)
-                    errorMessage = if (result.isNotEmpty()) {
+                    filteredCars = filterCars(cars, searchQuery.text, selectedMark, selectedModel, selectedColor, selectedEngineVolume, selectedCompletion)
+                    errorMessage = if (filteredCars.isNotEmpty()) {
                         ""
                     } else {
-                        "Результатів не знайдено"
+                        "Нічого не знайдено"
                     }
                 }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            FilterDropdown(
+                options = marks,
+                selectedOption = selectedMark,
+                onOptionSelected = { mark ->
+                    selectedMark = mark
+                },
+                label = "MARK"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            FilterDropdown(
+                options = models,
+                selectedOption = selectedModel,
+                onOptionSelected = { model ->
+                    selectedModel = model
+                },
+                label = "MODEL"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            FilterDropdown(
+                options = colors,
+                selectedOption = selectedColor,
+                onOptionSelected = { color ->
+                    selectedColor = color
+                },
+                label = "COLOR"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            FilterDropdown(
+                options = engineVolumes,
+                selectedOption = selectedEngineVolume,
+                onOptionSelected = { engineVolume ->
+                    selectedEngineVolume = engineVolume
+                },
+                label = "ENGINE VOLUME"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            FilterDropdown(
+                options = completions,
+                selectedOption = selectedCompletion,
+                onOptionSelected = { completion ->
+                    selectedCompletion = completion
+                },
+                label = "COMPLETION"
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row {
+                // Кнопка "Применить"
+                Button(
+                    onClick = {
+                        filteredCars = applyFilters(cars, selectedMark, selectedModel, selectedColor, selectedEngineVolume, selectedCompletion)
+                        errorMessage = if(filteredCars.isEmpty()) {
+                            "Нічого не знайдено"
+                        } else {
+                            ""
+                        }
+                    }
+                ) {
+                    Text("Застосувати")
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Кнопка "Сбросить"
+                Button(
+                    onClick = {
+                        selectedMark = ""
+                        selectedModel = ""
+                        selectedColor = ""
+                        selectedEngineVolume = ""
+                        selectedCompletion = ""
+                        shouldResetFilters = !shouldResetFilters
+                        filteredCars = applyFilters(cars, selectedMark, selectedModel, selectedColor, selectedEngineVolume, selectedCompletion)
+                    }
+                ) {
+                    Text("Сбросити фільтри")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Таблица для вывода информации о машинах
-            CarList(cars = cars, searchQuery = searchQuery, errorMessage = errorMessage)
+            CarList(cars = filteredCars, searchQuery = searchQuery, errorMessage = errorMessage)
         }
     }
 }
+
+
 
 @Composable
 fun SearchBar(
@@ -168,9 +274,65 @@ fun SearchBar(
 }
 
 @Composable
+fun FilterDropdown(
+    options: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
+    label: String
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = label,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = { expanded = !expanded },
+                modifier = Modifier.padding(end = 16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = "Dropdown",
+                    tint = Color.Black
+                )
+            }
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            options.forEach { option ->
+                val isSelected = option == selectedOption
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                    modifier = Modifier.background(if (isSelected) Color.LightGray else Color.Transparent)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun CarList(cars: List<Car>, searchQuery: TextFieldValue, errorMessage: String) {
     Column(modifier = Modifier.padding(16.dp)) {
-        val filteredCars = filterCars(cars, searchQuery.text)
+        val filteredCars = filterCars(cars, searchQuery.text, "", "", "", "", "")
         if (filteredCars.isEmpty()) {
             Text(errorMessage, color = Color.Red)
         } else {
@@ -200,7 +362,7 @@ fun CarItem(car: Car) {
                             "\n\nPRICE: ${car.price}" +
                             "\n\nCOLOR: ${car.color}" +
                             "\n\nENGINE VOLUME: ${car.engineVolume}" +
-                            "\n\nCOMPLECTION: ${car.complection}",
+                            "\n\nCOMPLETION: ${car.completion}",
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -223,16 +385,32 @@ fun EditButton() {
     }
 }
 
-
 // Функция фильтрации автомобилей
-fun filterCars(cars: List<Car>, query: String): List<Car> {
+fun filterCars(cars: List<Car>, query: String, mark: String, model: String, color: String, engineVolume: String, completion: String): List<Car> {
     return cars.filter { car ->
-        car.vin.contains(query, ignoreCase = true) ||
+        (car.vin.contains(query, ignoreCase = true) ||
                 car.mark.contains(query, ignoreCase = true) ||
                 car.model.contains(query, ignoreCase = true) ||
                 car.price.toString().contains(query, ignoreCase = true) ||
                 car.color.contains(query, ignoreCase = true) ||
                 car.engineVolume.toString().contains(query, ignoreCase = true) ||
-                car.complection.contains(query, ignoreCase = true)
+                car.completion.contains(query, ignoreCase = true)) &&
+                (mark.isEmpty() || car.mark == mark) &&
+                (model.isEmpty() || car.model == model) &&
+                (color.isEmpty() || car.color == color) &&
+                (engineVolume.isEmpty() || car.engineVolume.toString() == engineVolume) &&
+                (completion.isEmpty() || car.completion == completion)
+    }
+}
+
+
+// Функция применения фильтров
+fun applyFilters(cars: List<Car>, mark: String, model: String, color: String, engineVolume: String, completion: String): List<Car> {
+    return cars.filter { car ->
+        (mark.isEmpty() || car.mark == mark) &&
+                (model.isEmpty() || car.model == model) &&
+                (color.isEmpty() || car.color == color) &&
+                (engineVolume.isEmpty() || car.engineVolume.toString() == engineVolume) &&
+                (completion.isEmpty() || car.completion == completion)
     }
 }
