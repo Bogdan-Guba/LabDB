@@ -14,11 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -337,14 +338,14 @@ fun CarList(cars: List<Car>, searchQuery: TextFieldValue, errorMessage: String) 
             Text(errorMessage, color = Color.Red)
         } else {
             filteredCars.forEach { car ->
-                CarItem(car = car)
+                CarItem(car = car, onDelete = { /* Логика удаления */ })
             }
         }
     }
 }
 
 @Composable
-fun CarItem(car: Car) {
+fun CarItem(car: Car, onDelete: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
@@ -365,6 +366,16 @@ fun CarItem(car: Car) {
                             "\n\nCOMPLETION: ${car.completion}",
                     modifier = Modifier.weight(1f)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    onClick = onDelete
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Black
+                    )
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 EditButton()
             }
