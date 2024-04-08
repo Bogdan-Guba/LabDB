@@ -289,7 +289,7 @@ fun FilterDropdown(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = label,
+                text = selectedOption.ifEmpty { label },
                 modifier = Modifier.padding(start = 16.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
