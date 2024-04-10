@@ -3,8 +3,8 @@ package com.example.labsbase.view
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.labsbase.Car
 import com.example.labsbase.MainActivity
 
-class CarCreationActivity : AppCompatActivity() {
+class CarCreationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -43,12 +43,17 @@ fun CarCreationContent(context: Context) {
 
     Column(
         modifier = Modifier
+            .padding(0.dp)
             .fillMaxSize()
-            .padding(16.dp)
             .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Створити новий автомобіль", color = Color.Black, fontSize = 24.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "Створити новий автомобіль",
+            color = Color.Black,
+            fontSize = 24.sp,
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(

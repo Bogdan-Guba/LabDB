@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -44,6 +44,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.labsbase.view.CarCreationActivity
+import com.example.labsbase.view.CarEditActivity
+import java.io.Serializable
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,8 +63,8 @@ data class Car(
     val price: Int,
     val color: String,
     val engineVolume: Float,
-    val completion: String,
-)
+    val completion: String
+) : Serializable
 
 fun generateDummyCars(): List<Car> {
     return listOf(
@@ -381,16 +383,21 @@ fun CarItem(car: Car, onDelete: () -> Unit) {
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                EditButton()
+                EditButton(car = car)
             }
         }
     }
 }
 
 @Composable
-fun EditButton() {
+fun EditButton(car: Car) {
+    val context = LocalContext.current
     IconButton(
-        onClick = { /* Действие при нажатии на кнопку редактирования */ }
+        onClick = {
+            val intent = Intent(context, CarEditActivity::class.java)
+            intent.putExtra("car", car)
+            context.startActivity(intent)
+        }
     ) {
         Icon(
             imageVector = Icons.Filled.Edit,
