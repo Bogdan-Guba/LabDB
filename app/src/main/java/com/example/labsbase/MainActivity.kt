@@ -1,5 +1,9 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.labsbase
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -43,57 +47,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.labsbase.DB.Controller
+import com.example.labsbase.DB.Entity.CarsLocal
 import com.example.labsbase.view.CarCreationActivity
 import com.example.labsbase.view.CarEditActivity
-import java.io.Serializable
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Controller.initialize(this.applicationContext)
+        Controller.insertTableLocalDB1()
+        Controller.insertTableLocalDB2()
         setContent {
-            MainScreen()
+            MainScreen(Controller.getAllOfLocal().toMutableList())
         }
+
 
     }
 }
 
-data class Car(
-    val vin: String,
-    val mark: String,
-    val model: String,
-    val price: Int,
-    val color: String,
-    val engineVolume: Float,
-    val completion: String
-) : Serializable
 
-fun generateDummyCars(): List<Car> {
-    return listOf(
-        Car("ABC12345678901234", "Toyota", "Camry", 25000, "blue", 2.5f, "Basic"),
-        Car("DEF23456789012345", "Honda", "Accord", 28000, "red", 2.0f, "Premium"),
-        Car("GHI34567890123456", "Ford", "Mustang", 35000, "yellow", 3.0f, "Premium"),
-        Car("JKL45678901234567", "Chevrolet", "Cruze", 23000, "white", 1.8f, "Standard"),
-        Car("MNO56789012345678", "BMW", "X5", 60000, "black", 4.0f, "Luxury"),
-        Car("PQR67890123456789", "Mercedes-Benz", "E-Class", 55000, "silver", 3.5f, "Premium"),
-        Car("STU78901234567890", "Audi", "A4", 42000, "grey", 2.0f, "Premium"),
-        Car("VWX89012345678901", "Volkswagen", "Golf", 28000, "green", 1.6f, "Standard"),
-        Car("YZA90123456789012", "Subaru", "Forester", 32000, "orange", 2.5f, "Premium"),
-        Car("BCD01234567890123", "Lexus", "RX", 55000, "beige", 3.5f, "Luxury"),
-        Car("ZAB23456789012345", "Renault", "Master", 35325, "blue", 2.3f, "Base"),
-        Car("BCD45678901234567", "Peugeot", "3008", 32870, "black", 1.5f, "Allure Pack"),
-        Car("DEF67890123456789", "Volkswagen", "T-Roc", 31154, "green", 1.4f, "Style"),
-        Car("GHI90123456789012", "Mercedes-Benz", "V-Class", 125746, "silver", 2.1f, "AMG Style"),
-        Car("IJK12345678901234", "Kia", "Stonic", 24160, "white", 1.4f, "Prestige"),
-        Car("NOP67890123456789", "Volkswagen", "Tiguan", 40781, "gray", 2.0f, "Life"),
-        Car("ZAB89012345678901", "Citroen", "C3", 17041, "platinum", 1.2f, "Feel"),
-        Car("BCD01234567890123", "Volkswagen", "Arteon", 52307, "black", 2.0f, "R-Line"),
-        Car("QRS23456789012345", "Skoda", "Octavia", 33579, "red", 1.6f, "Style"),
-        Car("TUV45678901234567", "Toyota", "Camry", 38420, "beige", 2.5f, "LE")
-    )
-}
+
+
+
 
 @Composable
-fun MainScreen() {
+fun MainScreen(Cars:MutableList<CarsLocal>) {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
     var errorMessage by remember { mutableStateOf("") }
     var selectedMark by remember { mutableStateOf("") }
@@ -103,14 +83,14 @@ fun MainScreen() {
     var selectedCompletion by remember { mutableStateOf("") }
     var shouldResetFilters by remember { mutableStateOf(false) }
 
-    val cars = remember { generateDummyCars() }
+    var cars: MutableList<CarsLocal> = remember { Cars}
     var filteredCars by remember { mutableStateOf(cars) }
 
-    val marks = cars.map { it.mark }.distinct()
-    val models = cars.map { it.model }.distinct()
-    val colors = cars.map { it.color }.distinct()
-    val engineVolumes = cars.map { it.engineVolume.toString() }.distinct()
-    val completions = cars.map { it.completion }.distinct()
+    val marks = cars.map { it.Mark }.distinct()
+    val models = cars.map { it.Model }.distinct()
+    val colors = cars.map { it.Color }.distinct()
+    val engineVolumes = cars.map { it.EnginrVolume.toString() }.distinct()
+    val completions = cars.map { it.Complection }.distinct()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -338,21 +318,26 @@ fun FilterDropdown(
 }
 
 @Composable
-fun CarList(cars: List<Car>, searchQuery: TextFieldValue, errorMessage: String) {
+fun CarList(cars: MutableList<CarsLocal>, searchQuery: TextFieldValue, errorMessage: String) {
     Column(modifier = Modifier.padding(16.dp)) {
         val filteredCars = filterCars(cars, searchQuery.text, "", "", "", "", "")
         if (filteredCars.isEmpty()) {
             Text(errorMessage, color = Color.Red)
         } else {
             filteredCars.forEach { car ->
-                CarItem(car = car, onDelete = { /* Логика удаления */ })
+                CarItem(car = car, onDelete = {
+                    Controller.DeleteInAllDB(car.VIN)
+                    cars.remove(car)
+
+
+                })
             }
         }
     }
 }
 
 @Composable
-fun CarItem(car: Car, onDelete: () -> Unit) {
+fun CarItem(car: CarsLocal, onDelete: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
@@ -364,13 +349,13 @@ fun CarItem(car: Car, onDelete: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "VIN: ${car.vin} " +
-                            "\n\nMARK: ${car.mark}" +
-                            "\n\nMODEL: ${car.model}" +
-                            "\n\nPRICE: ${car.price}" +
-                            "\n\nCOLOR: ${car.color}" +
-                            "\n\nENGINE VOLUME: ${car.engineVolume}" +
-                            "\n\nCOMPLETION: ${car.completion}",
+                    text = "VIN: ${car.VIN} " +
+                            "\n\nMARK: ${car.Mark}" +
+                            "\n\nMODEL: ${car.Model}" +
+                            "\n\nPRICE: ${car.Price}" +
+                            "\n\nCOLOR: ${car.Color}" +
+                            "\n\nENGINE VOLUME: ${car.EnginrVolume}" +
+                            "\n\nCOMPLETION: ${car.Complection}",
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -391,7 +376,7 @@ fun CarItem(car: Car, onDelete: () -> Unit) {
 }
 
 @Composable
-fun EditButton(car: Car) {
+fun EditButton(car: CarsLocal) {
     val context = LocalContext.current
     IconButton(
         onClick = {
@@ -409,31 +394,31 @@ fun EditButton(car: Car) {
 }
 
 // Функция фильтрации автомобилей
-fun filterCars(cars: List<Car>, query: String, mark: String, model: String, color: String, engineVolume: String, completion: String): List<Car> {
+fun filterCars(cars: MutableList<CarsLocal>, query: String, mark: String, model: String, color: String, engineVolume: String, completion: String): MutableList<CarsLocal> {
     return cars.filter { car ->
-        (car.vin.contains(query, ignoreCase = true) ||
-                car.mark.contains(query, ignoreCase = true) ||
-                car.model.contains(query, ignoreCase = true) ||
-                car.price.toString().contains(query, ignoreCase = true) ||
-                car.color.contains(query, ignoreCase = true) ||
-                car.engineVolume.toString().contains(query, ignoreCase = true) ||
-                car.completion.contains(query, ignoreCase = true)) &&
-                (mark.isEmpty() || car.mark == mark) &&
-                (model.isEmpty() || car.model == model) &&
-                (color.isEmpty() || car.color == color) &&
-                (engineVolume.isEmpty() || car.engineVolume.toString() == engineVolume) &&
-                (completion.isEmpty() || car.completion == completion)
-    }
+        (car.VIN.contains(query, ignoreCase = true) ||
+                car.Mark.contains(query, ignoreCase = true) ||
+                car.Model.contains(query, ignoreCase = true) ||
+                car.Price.toString().contains(query, ignoreCase = true) ||
+                car.Color.contains(query, ignoreCase = true) ||
+                car.EnginrVolume.toString().contains(query, ignoreCase = true) ||
+                car.Complection.contains(query, ignoreCase = true)) &&
+                (mark.isEmpty() || car.Mark == mark) &&
+                (model.isEmpty() || car.Model == model) &&
+                (color.isEmpty() || car.Color == color) &&
+                (engineVolume.isEmpty() || car.EnginrVolume.toString() == engineVolume) &&
+                (completion.isEmpty() || car.Complection == completion)
+    }.toMutableList()
 }
 
 
 // Функция применения фильтров
-fun applyFilters(cars: List<Car>, mark: String, model: String, color: String, engineVolume: String, completion: String): List<Car> {
-    return cars.filter { car ->
-        (mark.isEmpty() || car.mark == mark) &&
-                (model.isEmpty() || car.model == model) &&
-                (color.isEmpty() || car.color == color) &&
-                (engineVolume.isEmpty() || car.engineVolume.toString() == engineVolume) &&
-                (completion.isEmpty() || car.completion == completion)
-    }
+fun applyFilters(cars: MutableList<CarsLocal>, mark: String, model: String, color: String, engineVolume: String, completion: String): MutableList<CarsLocal> {
+    return cars.filter { CarsLocal ->
+        (mark.isEmpty() || CarsLocal.Mark == mark) &&
+                (model.isEmpty() || CarsLocal.Model == model) &&
+                (color.isEmpty() || CarsLocal.Color == color) &&
+                (engineVolume.isEmpty() || CarsLocal.EnginrVolume.toString() == engineVolume) &&
+                (completion.isEmpty() || CarsLocal.Complection == completion)
+    }.toMutableList()
 }

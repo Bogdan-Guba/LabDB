@@ -1,6 +1,9 @@
 package com.example.labsbase.DB
 
 import android.content.Context
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
 
 import com.example.labsbase.DB.DAO.DAOCarsGlobal
@@ -15,7 +18,9 @@ import com.example.labsbase.DB.Entity.CarsLocal
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 object Controller {
@@ -46,6 +51,8 @@ object Controller {
     val daoCarsLocal2: DAOCarsLocal2 by lazy {
         localDB2.CarsLocal2Dao()
     }
+
+
 
     fun incertCentralDB(carsGlobal:CarsGlobal){
         CoroutineScope(Dispatchers.Main).launch {
@@ -132,51 +139,48 @@ object Controller {
         incertLocalDB2(CarsLocal("TUV45678901234567", "Toyota", "Camry", 38420, "beige", 2.5f, "LE"));
     }
 
-    suspend fun DeleteInAllDB(VIN:String) {
-        CoroutineScope(Dispatchers.Main).launch {
-
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    daoCentralDB.deleteByVIN(VIN.toString())
-                } catch (e: Exception) {
-                    print("problems in deletingCentral")
-                }
-                try {
-                    daoCarsLocal1.deleteByVIN(VIN.toString())
-                } catch (e: Exception) {
-                    print("problems in deleting Local1")
-                }
-                try {
-                    daoCarsLocal2.deleteByVIN(VIN.toString())
-                } catch (e: Exception) {
-                    print("problems in deletingLocal2")
-                }
+    fun DeleteInAllDB(VIN: String) = runBlocking {
+        withContext(Dispatchers.IO) {
+            try {
+                daoCentralDB.deleteByVIN(VIN)
+            } catch (e: Exception) {
+                println("Проблемы с удалением из CentralDB")
+            }
+            try {
+                daoCarsLocal1.deleteByVIN(VIN)
+            } catch (e: Exception) {
+                println("Проблемы с удалением из Local1")
+            }
+            try {
+                daoCarsLocal2.deleteByVIN(VIN)
+            } catch (e: Exception) {
+                println("Проблемы с удалением из Local2")
             }
         }
     }
-    fun getAllOfLocal():List<CarsLocal>{
-        var total= mutableListOf<CarsLocal>()
-        var list1=mutableListOf<CarsLocal>()
-        var list2=mutableListOf<CarsLocal>()
-        CoroutineScope(Dispatchers.Main).launch {
-
-            val result = withContext(Dispatchers.IO) {
-                try{
-                   list1=daoCarsLocal1.getAll().toMutableList()
-                }catch (e:Exception){
-                    print("Error in get first")
-                }
-                try{
-                    list2=daoCarsLocal2.getAll().toMutableList()
-                }catch (e:Exception){
-                    print("Error in get 2")
-                }
-            }
-
+    fun VINIsFree(VIN: String):Boolean= runBlocking{
+        var result:Boolean
+        withContext(Dispatchers.IO) {
+            result=daoCentralDB.VinFree(VIN).isEmpty()
         }
-        total.addAll(list1)
-        total.addAll(list2)
-        return total
+         result
+    }
+    fun PlaceByVIN(VIN: String):Int= runBlocking{
+        var result:Int
+        withContext(Dispatchers.IO) {
+            result=daoCentralDB.PlaceByVIN(VIN)
+        }
+        result
+    }
+    fun getAllOfLocal(): List<CarsLocal> = runBlocking {
+        val total = mutableListOf<CarsLocal>()
+        withContext(Dispatchers.IO) {
+            total.addAll(daoCarsLocal1.getAll())
+            total.addAll(daoCarsLocal2.getAll())
+        }
+        Log.i("QWERTY", total.isEmpty().toString())
+        Log.i("QWERTY", total.toString())
+        total.toList()
     }
 
 }

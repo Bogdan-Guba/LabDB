@@ -17,11 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,7 +33,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.labsbase.Car
+import com.example.labsbase.DB.Controller
+import com.example.labsbase.DB.Entity.CarsLocal
 import com.example.labsbase.MainActivity
 
 @Suppress("DEPRECATION")
@@ -45,7 +42,7 @@ class CarEditActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val car = intent.getSerializableExtra("car") as? Car
+            val car = intent.getSerializableExtra("car") as? CarsLocal
             if (car != null) {
                 CarEditScreen(car)
             } else {
@@ -56,15 +53,15 @@ class CarEditActivity : ComponentActivity() {
 }
 
 @Composable
-fun CarEditScreen(car: Car) {
+fun CarEditScreen(car: CarsLocal) {
     val context = LocalContext.current
-    var vin by remember { mutableStateOf(car.vin) }
-    var mark by remember { mutableStateOf(car.mark) }
-    var model by remember { mutableStateOf(car.model) }
-    var price by remember { mutableStateOf(car.price.toString()) }
-    var color by remember { mutableStateOf(car.color) }
-    var engineVolume by remember { mutableStateOf(car.engineVolume.toString()) }
-    var completion by remember { mutableStateOf(car.completion) }
+    var vin by remember { mutableStateOf(car.VIN) }
+    var mark by remember { mutableStateOf(car.Mark) }
+    var model by remember { mutableStateOf(car.Model) }
+    var price by remember { mutableStateOf(car.Price.toString()) }
+    var color by remember { mutableStateOf(car.Color) }
+    var engineVolume by remember { mutableStateOf(car.EnginrVolume.toString()) }
+    var completion by remember { mutableStateOf(car.Complection) }
 
     Surface {
         Column(
@@ -89,9 +86,27 @@ fun CarEditScreen(car: Car) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-                /* сохранения изменений */
-                val intent = Intent(context, MainActivity::class.java)
-                context.startActivity(intent)
+                val newCar = CarsLocal(
+                    VIN = vin,
+                    Mark = mark,
+                    Model = model,
+                    Price = price.toIntOrNull() ?: 0,
+                    Color = color,
+                    EnginrVolume = engineVolume.toFloatOrNull() ?: 0.0f,
+                    Complection = completion
+                )
+                if(!Controller.VINIsFree(vin)){
+                    if(Controller.PlaceByVIN(vin)==1){
+                        Controller.incertLocalDB1(newCar)
+                    }
+                    if(Controller.PlaceByVIN(vin)==2){
+                        Controller.incertLocalDB2(newCar)
+                    }
+                    val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)
+                }
+
+
             }) {
                 Text("Зберегти")
             }
@@ -130,18 +145,7 @@ fun CarEditField(
                     .clip(RoundedCornerShape(8.dp))
             )
 
-            IconButton(
-                onClick = {
-                    onDelete()
-                    isVisible = false
-                },
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete"
-                )
-            }
+
         }
     }
 }

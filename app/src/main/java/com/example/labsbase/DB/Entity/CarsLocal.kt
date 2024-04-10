@@ -2,6 +2,7 @@ package com.example.labsbase.DB.Entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity
 data class CarsLocal(
@@ -12,4 +13,4 @@ data class CarsLocal(
     val Color:String,
     val EnginrVolume: Float,
     val Complection:String
-)
+): Serializable

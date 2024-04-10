@@ -19,7 +19,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.labsbase.Car
+import com.example.labsbase.DB.Controller
+import com.example.labsbase.DB.Entity.CarsLocal
 import com.example.labsbase.MainActivity
 
 class CarCreationActivity : ComponentActivity() {
@@ -40,6 +41,7 @@ fun CarCreationContent(context: Context) {
     var color by remember { mutableStateOf("") }
     var engineVolume by remember { mutableStateOf("") }
     var completion by remember { mutableStateOf("") }
+    var place:String by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -60,7 +62,6 @@ fun CarCreationContent(context: Context) {
             value = vin,
             onValueChange = { vin = it },
             label = { Text("VIN") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
             textStyle = TextStyle(color = Color.Black)
         )
@@ -115,20 +116,39 @@ fun CarCreationContent(context: Context) {
             textStyle = TextStyle(color = Color.Black)
         )
 
+        OutlinedTextField(
+            value = place,
+            onValueChange = { place = it },
+            label = { Text("Place") },
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            textStyle = TextStyle(color = Color.Black)
+        )
+
         Button(
             onClick = {
-                val newCar = Car(
-                    vin = vin,
-                    mark = mark,
-                    model = model,
-                    price = price.toIntOrNull() ?: 0,
-                    color = color,
-                    engineVolume = engineVolume.toFloatOrNull() ?: 0.0f,
-                    completion = completion
+                val newCar = CarsLocal(
+                    VIN = vin,
+                    Mark = mark,
+                    Model = model,
+                    Price = price.toIntOrNull() ?: 0,
+                    Color = color,
+                    EnginrVolume = engineVolume.toFloatOrNull() ?: 0.0f,
+                    Complection = completion
                 )
-                // добавить новую машину к списку машин
-                val intent = Intent(context, MainActivity::class.java)
-                context.startActivity(intent)
+                if (Controller.VINIsFree(vin)){
+                    if (place=="1"){
+                        Controller.incertLocalDB1(newCar)
+                    }
+                    if (place=="2"){
+                        Controller.incertLocalDB2(newCar)
+                    }
+
+
+                    val intent = Intent(context, MainActivity::class.java)
+                    context.startActivity(intent)
+                }
+
             },
             modifier = Modifier.padding(top = 16.dp)
         ) {

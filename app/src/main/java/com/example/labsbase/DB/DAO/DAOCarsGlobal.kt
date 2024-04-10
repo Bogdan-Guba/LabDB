@@ -15,7 +15,11 @@ interface DAOCarsGlobal {
 
     @Query("DELETE FROM CarsGlobal WHERE VIN = :VIN")
     suspend fun deleteByVIN(VIN: String)
+    @Query("SELECT * FROM CarsGlobal WHERE VIN = :VIN")
+    suspend fun VinFree(VIN: String):List<CarsGlobal>
 
+    @Query("SELECT Place FROM CarsGlobal WHERE VIN = :VIN")
+    fun PlaceByVIN(VIN: String):Int
 
 
 
