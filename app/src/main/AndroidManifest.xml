@@ -12,17 +12,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LabsBase"
         tools:targetApi="31">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.LabsBase">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".view.CarCreationActivity"
+            android:label="Car Creation Activity"
+            android:theme="@style/Theme.AppCompat" />
+
+        <activity
+            android:name=".view.CarEditActivity"
+            android:label="Car Edit Activity"
+            android:theme="@style/Theme.AppCompat" />
     </application>
 
 </manifest>

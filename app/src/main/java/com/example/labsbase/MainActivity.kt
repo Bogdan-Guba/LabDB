@@ -1,5 +1,6 @@
 package com.example.labsbase
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -38,8 +40,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.labsbase.view.CarCreationActivity
+import com.example.labsbase.view.CarEditActivity
+import java.io.Serializable
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,8 +64,8 @@ data class Car(
     val price: Int,
     val color: String,
     val engineVolume: Float,
-    val completion: String,
-)
+    val completion: String
+) : Serializable
 
 fun generateDummyCars(): List<Car> {
     return listOf(
@@ -86,7 +92,6 @@ fun generateDummyCars(): List<Car> {
     )
 }
 
-
 @Composable
 fun MainScreen() {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
@@ -96,7 +101,7 @@ fun MainScreen() {
     var selectedColor by remember { mutableStateOf("") }
     var selectedEngineVolume by remember { mutableStateOf("") }
     var selectedCompletion by remember { mutableStateOf("") }
-    var shouldResetFilters by remember { mutableStateOf(false) } // 1. Добавлено состояние для сброса фильтров
+    var shouldResetFilters by remember { mutableStateOf(false) }
 
     val cars = remember { generateDummyCars() }
     var filteredCars by remember { mutableStateOf(cars) }
@@ -232,14 +237,13 @@ fun MainScreen() {
     }
 }
 
-
-
 @Composable
 fun SearchBar(
     searchQuery: TextFieldValue,
     onSearchQueryChange: (TextFieldValue) -> Unit,
     onSearch: () -> Unit
 ) {
+    val context = LocalContext.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -261,7 +265,10 @@ fun SearchBar(
                             tint = Color.Black
                         )
                     }
-                    IconButton(onClick = { /* Действие при нажатии на кнопку создать */ }) {
+                    IconButton(onClick = {
+                        val intent = Intent(context, CarCreationActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.AddCircle,
                             contentDescription = "Add",
@@ -290,7 +297,7 @@ fun FilterDropdown(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = label,
+                text = selectedOption.ifEmpty { label },
                 modifier = Modifier.padding(start = 16.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -338,14 +345,14 @@ fun CarList(cars: List<Car>, searchQuery: TextFieldValue, errorMessage: String) 
             Text(errorMessage, color = Color.Red)
         } else {
             filteredCars.forEach { car ->
-                CarItem(car = car)
+                CarItem(car = car, onDelete = { /* Логика удаления */ })
             }
         }
     }
 }
 
 @Composable
-fun CarItem(car: Car) {
+fun CarItem(car: Car, onDelete: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
@@ -367,16 +374,31 @@ fun CarItem(car: Car) {
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                EditButton()
+                IconButton(
+                    onClick = onDelete
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Black
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                EditButton(car = car)
             }
         }
     }
 }
 
 @Composable
-fun EditButton() {
+fun EditButton(car: Car) {
+    val context = LocalContext.current
     IconButton(
-        onClick = { /* Действие при нажатии на кнопку редактирования */ }
+        onClick = {
+            val intent = Intent(context, CarEditActivity::class.java)
+            intent.putExtra("car", car)
+            context.startActivity(intent)
+        }
     ) {
         Icon(
             imageVector = Icons.Filled.Edit,
