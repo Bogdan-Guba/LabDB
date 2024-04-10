@@ -8,6 +8,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,11 +68,6 @@ class MainActivity : ComponentActivity() {
 
     }
 }
-
-
-
-
-
 
 @Composable
 fun MainScreen(Cars:MutableList<CarsLocal>) {
@@ -320,7 +317,7 @@ fun FilterDropdown(
 @Composable
 fun CarList(cars: MutableList<CarsLocal>, searchQuery: TextFieldValue, errorMessage: String) {
     Column(modifier = Modifier.padding(16.dp)) {
-        val filteredCars = filterCars(cars, searchQuery.text, "", "", "", "", "")
+        var filteredCars = filterCars(cars, searchQuery.text, "", "", "", "", "")
         if (filteredCars.isEmpty()) {
             Text(errorMessage, color = Color.Red)
         } else {
@@ -328,8 +325,6 @@ fun CarList(cars: MutableList<CarsLocal>, searchQuery: TextFieldValue, errorMess
                 CarItem(car = car, onDelete = {
                     Controller.DeleteInAllDB(car.VIN)
                     cars.remove(car)
-
-
                 })
             }
         }
@@ -338,38 +333,47 @@ fun CarList(cars: MutableList<CarsLocal>, searchQuery: TextFieldValue, errorMess
 
 @Composable
 fun CarItem(car: CarsLocal, onDelete: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        modifier = Modifier.padding(vertical = 8.dp)
+    var isVisible by remember { mutableStateOf(true) } // Track visibility state
+
+    AnimatedVisibility(
+        isVisible, exit = fadeOut() // Animate fade out on exit
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "VIN: ${car.VIN} " +
-                            "\n\nMARK: ${car.Mark}" +
-                            "\n\nMODEL: ${car.Model}" +
-                            "\n\nPRICE: ${car.Price}" +
-                            "\n\nCOLOR: ${car.Color}" +
-                            "\n\nENGINE VOLUME: ${car.EnginrVolume}" +
-                            "\n\nCOMPLETION: ${car.Complection}",
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = onDelete
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color.White,
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.Black
+                    Text(
+                        text = "VIN: ${car.VIN} " +
+                                "\n\nMARK: ${car.Mark}" +
+                                "\n\nMODEL: ${car.Model}" +
+                                "\n\nPRICE: ${car.Price}" +
+                                "\n\nCOLOR: ${car.Color}" +
+                                "\n\nENGINE VOLUME: ${car.EnginrVolume}" +
+                                "\n\nCOMPLETION: ${car.Complection}",
+                        modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            isVisible = false // Set invisible on delete
+                            onDelete()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Delete",
+                            tint = Color.Black
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    EditButton(car = car)
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                EditButton(car = car)
             }
         }
     }
