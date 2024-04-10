@@ -1,5 +1,6 @@
 package com.example.labsbase
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,8 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.labsbase.view.CarCreationActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,7 +89,6 @@ fun generateDummyCars(): List<Car> {
     )
 }
 
-
 @Composable
 fun MainScreen() {
     var searchQuery by remember { mutableStateOf(TextFieldValue()) }
@@ -96,7 +98,7 @@ fun MainScreen() {
     var selectedColor by remember { mutableStateOf("") }
     var selectedEngineVolume by remember { mutableStateOf("") }
     var selectedCompletion by remember { mutableStateOf("") }
-    var shouldResetFilters by remember { mutableStateOf(false) } // 1. Добавлено состояние для сброса фильтров
+    var shouldResetFilters by remember { mutableStateOf(false) }
 
     val cars = remember { generateDummyCars() }
     var filteredCars by remember { mutableStateOf(cars) }
@@ -232,14 +234,13 @@ fun MainScreen() {
     }
 }
 
-
-
 @Composable
 fun SearchBar(
     searchQuery: TextFieldValue,
     onSearchQueryChange: (TextFieldValue) -> Unit,
     onSearch: () -> Unit
 ) {
+    val context = LocalContext.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -261,7 +262,10 @@ fun SearchBar(
                             tint = Color.Black
                         )
                     }
-                    IconButton(onClick = { /* Действие при нажатии на кнопку создать */ }) {
+                    IconButton(onClick = {
+                        val intent = Intent(context, CarCreationActivity::class.java)
+                        context.startActivity(intent)
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.AddCircle,
                             contentDescription = "Add",
