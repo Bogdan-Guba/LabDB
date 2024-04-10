@@ -4,6 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +17,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,17 +74,17 @@ fun CarEditScreen(car: Car) {
                 .background(Color.White),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Редагування автомобіля",color = Color.Black, fontSize = 24.sp)
+            Text("Редагування автомобіля", color = Color.Black, fontSize = 24.sp)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            CarEditField("VIN", vin) { vin = it }
-            CarEditField("Mark", mark) { mark = it }
-            CarEditField("Model", model) { model = it }
-            CarEditField("Price", price) { price = it }
-            CarEditField("Color", color) { color = it }
-            CarEditField("Engine Volume", engineVolume) { engineVolume = it }
-            CarEditField("Completion", completion) { completion = it }
+            CarEditField("VIN", vin, { vin = it }) { vin = "" }
+            CarEditField("Mark", mark, { mark = it }) { mark = "" }
+            CarEditField("Model", model, { model = it }) { model = "" }
+            CarEditField("Price", price, { price = it }) { price = "" }
+            CarEditField("Color", color, { color = it }) { color = "" }
+            CarEditField("Engine Volume", engineVolume, { engineVolume = it }) { engineVolume = "" }
+            CarEditField("Completion", completion, { completion = it }) { completion = "" }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -91,27 +99,49 @@ fun CarEditScreen(car: Car) {
     }
 }
 
+
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CarEditField(label: String, value: String, onValueChange: (String) -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 8.dp)
+fun CarEditField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    onDelete: () -> Unit
+) {
+    var isVisible by remember { mutableStateOf(true) }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(),
+        exit = fadeOut()
     ) {
-        Text(label, modifier = Modifier.width(100.dp))
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .weight(1f)
-                .clip(RoundedCornerShape(8.dp))
-        )
-
-        Button(
-            onClick = { onValueChange("") },
-            modifier = Modifier.padding(start = 8.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            Text("Очистити")
+            Text(label, modifier = Modifier.width(100.dp))
+
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+
+            IconButton(
+                onClick = {
+                    onDelete()
+                    isVisible = false
+                },
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Delete"
+                )
+            }
         }
     }
 }
